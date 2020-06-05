@@ -9,8 +9,11 @@ How to build (Mac OSX):
 * cargo build
 * cp target/debug/libphy_channels.dylib package/phy_channels/phy_channels.so
 
+Other platforms:
+On Windows copy target/debug/libphy_channels.dll to package/phy_channels/phy_channels.pyd and on Linux copy target/debug/libphy_channels.so to package/phy_channels/phy_channels.so
+
 How to use:
 * run your phoenix channels server (https://hexdocs.pm/phoenix/channels.html)
-* example code is in 'package/test.py'
+* example python client code is in 'package/test.py'
 * cd package
 * python test.py
