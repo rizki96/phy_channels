@@ -49,7 +49,8 @@ impl PhoenixChannel {
         
         let url: String = pyurl.extract().unwrap();
         let mut params_holder: Vec<(String, String)> = Vec::new();
-        pyparams.iter().for_each(|(key, val)| params_holder.push((key.to_string(), val.to_string())));
+        pyparams.iter().for_each(|(key, val)| params_holder.push(
+            (key.to_string(), val.to_string())));
         let mut params: Vec<(&str, &str)> = vec![];
         params_holder.iter().for_each(|(key, val)| params.push((&key, &val)));
         
@@ -70,12 +71,12 @@ impl PhoenixChannel {
 
         let sender_heartbeat = Arc::clone(&self.sender_ref);
         thread::spawn(move || {
-          loop {
-              thread::sleep(Duration::from_secs(2));
-              // if the mutex is poisoned then the whole thread wont work
-              let mut sender = sender_heartbeat.lock().unwrap();
-              sender.heartbeat().unwrap();
-          }
+            loop {
+                thread::sleep(Duration::from_secs(2));
+                // if the mutex is poisoned then the whole thread wont work
+                let mut sender = sender_heartbeat.lock().unwrap();
+                sender.heartbeat().unwrap();
+            }
         });
     
         let sender_join = Arc::clone(&self.sender_ref);
@@ -113,7 +114,12 @@ impl PhoenixChannel {
         let mut reader = reader_clone.lock().unwrap();
         let runner = reader.as_mut().unwrap().for_each(|msg| {
             //println!("{:?}", msg);
-            if let message::Message::Json(message::PhoenixMessage{join_ref, message_ref, topic, event, payload}) = msg {
+            if let message::Message::Json(message::PhoenixMessage{
+                                              join_ref,
+                                              message_ref,
+                                              topic,
+                                              event,
+                                              payload}) = msg {
                 let _join_ref = match join_ref {
                     Some(val) => val,
                     None => 0
@@ -130,12 +136,14 @@ impl PhoenixChannel {
                     event::EventKind::Reply => String::from("phx_reply"),
                     event::EventKind::Custom(val) => val,
                 };
-                callback.call(py, (m_ref, &topic, &ev, &payload.to_string()), None).unwrap();
+                callback.call(py, (m_ref, &topic, &ev, &payload.to_string()),
+                              None).unwrap();
             }
 
             Ok(())
         });
 
+        // TODO: how to get along with python async/await
         let mut core = Core::new().unwrap();
         core.run(runner).unwrap();
 
